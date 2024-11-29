@@ -16,6 +16,8 @@ This is a simple **real-time chat application** built using **Python** and **soc
 - **Client**: Manages user input, sends and receives messages, and handles channel joining and private messaging.
 - **Server**: Manages the connections of multiple clients, handles channel join/leave functionality, and ensures that messages are routed correctly.
 
+### Command List
+
 | **Command**                 | **Description**                                                    | **Example**                               |
 |-----------------------------|--------------------------------------------------------------------|-------------------------------------------|
 | `/join <channel_name>`       | Join a specified channel                                           | `/join general`                          |
@@ -34,22 +36,24 @@ This is a simple **real-time chat application** built using **Python** and **soc
 
 Clone this repository to your local machine:
 
-bash
+```bash
 git clone <repository_url>
+```
 
-How to Run
+### How to Run
 1. Start the Server
 Run the following command to start the server:
 
 ```bash
 Copy code
-python server.py```
+python server.py
+```
+
 2. Start the Client
 Run the following command to start the client application:
 
 ```bash
 Copy code
 python client.py
-You will be prompted to enter a username, and then you can join a channel or send messages.```
-
-Command List
+```
+You will be prompted to enter a username, and then you can join a channel or send messages.
