@@ -56,7 +56,7 @@ def handle_client(client, name):
                 # MENU JOIN CHANEL
                 if message.startswith("/join/"):
                     # Menggunakan substring untuk mengambil nama channel
-                    new_channel = message[6:]  # Ambil substring setelah "/join "
+                    new_channel = message[6:]  # Ambil substring setelah "/join"
                     if current_channel:
                         leave_channel(client, current_channel, name)
                     join_channel(client, new_channel, name)

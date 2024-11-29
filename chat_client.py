@@ -52,7 +52,7 @@ def start_client():
             client.send("Keluar dari chat.".encode('utf-8'))
             break
         elif message.startswith("/join/"):  # Command to change channel
-            # Menggunakan substring untuk memotong setelah "/join "
+            # Menggunakan substring untuk memotong setelah "/join/"
             new_channel = message[6:]  # Ambil substring setelah "/join "
             client.send(f"/join/{new_channel}".encode('utf-8'))
             channel = new_channel  # Update local channel variable
