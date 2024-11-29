@@ -1,6 +1,7 @@
 import socket
 import threading
 import paho.mqtt.client as mqtt
+from datetime import datetime
 
 # MQTT broker setup
 broker = "test.mosquitto.org"  # Public MQTT broker
@@ -9,6 +10,10 @@ port = 1883
 # Dictionary untuk menyimpan data klien dan saluran
 clients = {}  # Menyimpan data klien dalam format {client_socket: {'name': name, 'channel': channel}}
 channels = {} # Menyimpan daftar klien di setiap channel {channel_name: [client_sockets]}
+
+def add_timestamp(message):
+    """Menambahkan timestamp ke pesan"""
+    return f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}"
 
 def broadcast(message, channel, sender_name, client=None):
     """
@@ -20,30 +25,32 @@ def broadcast(message, channel, sender_name, client=None):
     """
     if channel in channels:
         for c in channels[channel]:
-            if c != client:  # Only send to others in the same channel agar pengirim tidak menerima ulang pesan yang ia kirim.
+            if c != client:
                 try:
-                    c.send(f"{sender_name}: {message}".encode('utf-8'))
+                    timestamped_message = add_timestamp(f"[Pesan Saluran {channel}] {sender_name}: {message}")
+                    c.send(timestamped_message.encode('utf-8'))
                 except:
                     remove_client(c)
-#KOMUNIKASI 1 ON 1
+
 def send_private_message(sender_name, target_name, message):
     """Send a private message from sender to target if target exists."""
     target_client = None
     sender_client = None  # Socket pengirim
     for client, info in clients.items():
-        if info['name'] == target_name:  # Cari penerima pesan
+        if info['name'] == target_name:
             target_client = client
-        if info['name'] == sender_name:  # Cari pengirim pesan
+        if info['name'] == sender_name:
             sender_client = client
     if target_client:
         try:
-            target_client.send(f"Private from {sender_name}: {message}".encode('utf-8'))
+            timestamped_message = add_timestamp(f"[Pesan Pribadi] {sender_name}: {message}")
+            target_client.send(timestamped_message.encode('utf-8'))
         except:
             remove_client(target_client)
     else:
         # Jika penerima tidak ditemukan, beri tahu pengirim
         if sender_client:
-            sender_client.send(f"Penerima '{target_name}' tidak tersedia atau tidak terhubung.".encode('utf-8'))
+            sender_client.send(add_timestamp(f"Penerima '{target_name}' tidak tersedia atau tidak terhubung.").encode('utf-8'))
         print(f"{sender_name} attempted to message {target_name}, but they are not connected.")
 
 def handle_client(client, name):
@@ -78,6 +85,8 @@ def handle_client(client, name):
                         target_name = message_parts[:target_name_end]  # Substring nama target
                         private_msg = message_parts[target_name_end+1:]  # Substring pesan pribadi
                         send_private_message(name, target_name, private_msg)
+                        timestamped_message = add_timestamp(f"[Pesan Pribadi] {name}: {private_msg}")
+                        print(timestamped_message)  # Tampilkan pesan pribadi dengan timestamp
                     else:
                         client.send("Format pesan pribadi salah. Gunakan /msg/<nama_client>/<pesan>".encode('utf-8'))
                 # Mengirim pesan ke channel
@@ -87,7 +96,7 @@ def handle_client(client, name):
                     
                     # Ensure client is in the correct channel before broadcasting
                     if clients[client]['channel'] == channel:
-                        print(f"Pesan diterima di saluran {channel} dari {name}: {msg}")
+                        print(f"[Pesan Saluran {channel}] {name}: {msg}")
                         broadcast(msg, channel, name, client)
                         mqtt_client.publish(f"chatroom/{channel}", f"{name}: {msg}")
                     else:
@@ -101,13 +110,8 @@ def handle_client(client, name):
             print(f"Error: {e}")
             continue
 
-
 def remove_client(client):
-    """
-    Fungsi untuk menghapus klien dari daftar ketika klien keluar
-    + memberikan notifikasi kepada anggota channel.
-    :param client: Socket klien
-    """
+    """Fungsi untuk menghapus klien dari daftar ketika klien keluar"""
     if client in clients:
         client_info = clients.pop(client)  # Hapus klien dari dictionary
         channel = client_info['channel']  # Ambil channel klien
@@ -115,35 +119,23 @@ def remove_client(client):
 
         if channel in channels and client in channels[channel]:
             channels[channel].remove(client)  # Hapus klien dari channel
-            # Broadcast notifikasi kepada anggota channel lain
             broadcast(f"{name} telah keluar dari saluran {channel}.", channel, "Server")
 
         print(f"Klien {name} telah terputus.")  # Log aktivitas klien
 
     client.close()  # Tutup koneksi socket
 
-
 def join_channel(client, channel, name):
-    """
-    Fungsi untuk menambahkan klien ke channel tertentu.
-    :param client: Socket klien
-    :param channel: Nama channel yang akan dimasuki
-    :param name: Nama klien
-    """
+    """Fungsi untuk menambahkan klien ke channel tertentu."""
     if channel not in channels:
-        channels[channel] = [] # Jika channel belum ada, buat baru
-    channels[channel].append(client) # + client
+        channels[channel] = []  # Jika channel belum ada, buat baru
+    channels[channel].append(client)  # + client
     clients[client]['channel'] = channel  # Update client's channel info
     broadcast(f"{name} telah bergabung dengan saluran {channel}.", channel, "Server", client)
     client.send(f"Anda telah bergabung dengan saluran {channel}.".encode('utf-8'))
 
 def leave_channel(client, channel, name):
-    """
-    Fungsi untuk mengeluarkan klien dari channel tertentu.
-    :param client: Socket klien
-    :param channel: Nama channel
-    :param name: Nama klien
-    """
+    """Fungsi untuk mengeluarkan klien dari channel tertentu."""
     if channel in channels and client in channels[channel]:
         channels[channel].remove(client)
         clients[client]['channel'] = None  # Update client's channel info to None
@@ -164,14 +156,11 @@ def start_server():
 
         # Loop untuk memastikan nama client unique
         while True:
-            ## Multi thread mengelola Nama Pengguna (Username):
             client.send("Masukkan nama Anda: ".encode('utf-8'))
             name = client.recv(1024).decode('utf-8')
 
-            # Check kondisi apakah nama client unique
             if any(info['name'] == name for info in clients.values()):
                 client.send("Nama sudah dipakai, silakan pilih nama lain.".encode('utf-8'))
-            #Apabila unique akan disimpan ke clients = {}
             else:
                 clients[client] = {'name': name, 'channel': None}  # Save client with unique name
                 client.send("Nama diterima. Selamat datang!".encode('utf-8'))
@@ -212,8 +201,5 @@ def start_mqtt_client():
     mqtt_client.loop_start()
 
 if __name__ == "__main__":
-    # Start the MQTT client in the background
     start_mqtt_client()
-
-    # Start the socket server
     start_server()
