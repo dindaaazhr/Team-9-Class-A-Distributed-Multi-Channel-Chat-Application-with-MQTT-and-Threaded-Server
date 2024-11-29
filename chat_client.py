@@ -7,7 +7,8 @@ def receive_messages(client):
         try:
             message = client.recv(1024).decode('utf-8')
             if message:
-                print("\n" + message)  # Display the message
+                # Display the message with timestamp
+                print("\n" + message)  # No additional timestamp added here
             else:
                 break
         except:
@@ -18,7 +19,7 @@ def start_client():
     # Membuat socket klien
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # Menghubungkan ke server
-    client.connect(('192.168.1.10', 12345))  
+    client.connect(('192.168.0.24', 12345))  
 
     # Receive and enter name
     while True:
@@ -52,19 +53,14 @@ def start_client():
             client.send("Keluar dari chat.".encode('utf-8'))
             break
         elif message.startswith("/join/"):  # Command to change channel
-            # Menggunakan substring untuk memotong setelah "/join/"
             new_channel = message[6:]  # Ambil substring setelah "/join "
             client.send(f"/join/{new_channel}".encode('utf-8'))
             channel = new_channel  # Update local channel variable
         elif message == "/leave":  # Command to leave current channel
             client.send("/leave".encode('utf-8'))
-            channel = None  #apabila client leave maka channel dibuat none
-        
-        # KOMUNIKASI 1 ON 1
+            channel = None  # Update channel to None after leaving
         elif message.startswith("/msg/"):  # Command to send private message
-            # Menggunakan substring untuk memotong "/msg/" dan mengambil target dan pesan
             message_parts = message[5:]  # Mengambil semua karakter setelah "/msg/"
-            # Menemukan posisi "/" berikutnya untuk memisahkan target dan pesan
             target_name_end = message_parts.find("/")
             if target_name_end != -1:
                 target_name = message_parts[:target_name_end]  # Substring nama target
@@ -73,14 +69,11 @@ def start_client():
             else:
                 print("Format pesan pribadi salah. Gunakan /msg/<nama_client>/<pesan>")
         else:
-            #proses untuk memastikan pengiriman pesan dalam channel apakah pengirim benar2 ada di channel
             if channel:
                 client.send(f"{channel}: {message}".encode('utf-8'))
             else:
-                print("Anda tidak berada di saluran mana pun. Gunakan /join/<nama_saluran> untuk bergabung dan /msg/<nama user>/<pesan> untuk mengirim pesan pribadi>.")
-
+                print("Anda tidak berada di saluran mana pun. Gunakan /join/<nama_saluran> untuk bergabung.")
     client.close()
-
 
 if __name__ == "__main__":
     start_client()
