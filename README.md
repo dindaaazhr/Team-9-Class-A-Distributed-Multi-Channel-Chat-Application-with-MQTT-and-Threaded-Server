@@ -15,6 +15,15 @@ This is a simple **real-time chat application** built using **Python** and **soc
 
 - **Client**: Manages user input, sends and receives messages, and handles channel joining and private messaging.
 - **Server**: Manages the connections of multiple clients, handles channel join/leave functionality, and ensures that messages are routed correctly.
+
+| **Command**                 | **Description**                                                    | **Example**                               |
+|-----------------------------|--------------------------------------------------------------------|-------------------------------------------|
+| `/join <channel_name>`       | Join a specified channel                                           | `/join general`                          |
+| `/leave`                    | Leave the current channel and stop receiving messages in it        | `/leave`                                 |
+| `/msg <username> <msg>`      | Send a private message to another user                             | `/msg john Hey, how are you?`            |
+| `exit`                       | Exit the chat application                                          | `exit`                                   |
+| `<channel_name>: <msg>`      | Send a message to the current channel you're in                    | `general: Hello everyone!`               |
+
   
 ## Requirements
 
