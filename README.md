@@ -35,7 +35,7 @@ This is a simple **real-time chat application** built using **Python** and **soc
 Clone this repository to your local machine:
 
 ```bash
-git clone <repository_url>
+git clone <repository_url>```
 
 How to Run
 1. Start the Server
