@@ -20,9 +20,9 @@ This is a simple **real-time chat application** built using **Python** and **soc
 
 | **Command**                 | **Description**                                                    | **Example**                               |
 |-----------------------------|--------------------------------------------------------------------|-------------------------------------------|
-| `/join <channel_name>`       | Join a specified channel                                           | `/join general`                          |
+| `/join/<channel_name>`       | Join a specified channel                                           | `/join general`                          |
 | `/leave`                    | Leave the current channel and stop receiving messages in it        | `/leave`                                 |
-| `/msg <username> <msg>`      | Send a private message to another user                             | `/msg john Hey, how are you?`            |
+| `/msg/<username>/<msg>`      | Send a private message to another user                             | `/msg john Hey, how are you?`            |
 | `exit`                       | Exit the chat application                                          | `exit`                                   |
 | `<channel_name>: <msg>`      | Send a message to the current channel you're in                    | `general: Hello everyone!`               |
 
@@ -37,7 +37,7 @@ This is a simple **real-time chat application** built using **Python** and **soc
 Clone this repository to your local machine:
 
 ```bash
-git clone <repository_url>
+git clone [<repository_url>](https://github.com/dindaaazhr/Team-9-Class-A-Distributed-Multi-Channel-Chat-Application-with-MQTT-and-Threaded-Server.git)
 ```
 
 ### How to Run
