@@ -45,7 +45,6 @@ git clone [<repository_url>](https://github.com/dindaaazhr/Team-9-Class-A-Distri
 Run the following command to start the server:
 
 ```bash
-Copy code
 python server.py
 ```
 
@@ -53,7 +52,6 @@ python server.py
 Run the following command to start the client application:
 
 ```bash
-Copy code
 python client.py
 ```
 You will be prompted to enter a username, and then you can join a channel or send messages.
